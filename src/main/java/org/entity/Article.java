@@ -51,11 +51,11 @@ public class Article {
         this.createDate = createDate;
     }
 
-    public boolean isPublished() {
+    public boolean getIsPublished() {
         return isPublished;
     }
 
-    public void setPublished(boolean published) {
+    public void setIsPublished(boolean published) {
         isPublished = published;
     }
 
@@ -65,5 +65,11 @@ public class Article {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+    @Override
+    public String toString() {
+        return "\n" + id + "- Title: " + title + "\n" + "Brief: " +
+                brief + "\n" + "Created date: " + createDate + "\n";
+
     }
 }

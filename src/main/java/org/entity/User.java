@@ -1,21 +1,17 @@
 package org.entity;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class User {
 private int id;
 private String username;
 private String nationalCode;
-private String birthday;
+private Date birthday;
 private String password;
 public void User (){}
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -34,11 +30,11 @@ public void User (){}
         this.nationalCode = nationalCode;
     }
 
-    public String getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(String birthday) {
+    public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
 
