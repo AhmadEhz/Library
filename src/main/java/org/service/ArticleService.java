@@ -6,13 +6,10 @@ import org.repository.ArticleRepository;
 import java.sql.SQLException;
 
 public class ArticleService {
-    static Article article = new Article();
 
-    public static boolean checkArticle(Article article) {
+    public static boolean checkArticle(Article article, boolean checkIsPublished, boolean checkUser_id) {
         try {
-            if (ArticleRepository.showArticle(article) != null)
-                return true;
-            else return false;
+            return ArticleRepository.loadArticle(article, checkIsPublished, checkUser_id) != null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -20,16 +17,43 @@ public class ArticleService {
 
     public static Article[] loadAllArticles() {
         try {
-            return ArticleRepository.loadAllAritcle();
+            return ArticleRepository.loadAllArticles();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static Article loadSelectedArticle(Article article) {
+    public static Article loadSelectedArticle(Article article, boolean checkIsPublished, boolean checkUser_id) {
         try {
-            return ArticleRepository.showArticle(article);
+            return ArticleRepository.loadArticle(article, checkIsPublished, checkUser_id);
 
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Article[] loadUserArticles(int user_id) {
+        Article[] article;
+        try {
+            article = ArticleRepository.loadUserArticles(user_id);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return article;
+    }
+
+    public static void saveArticle(Article article) {
+        try {
+            ArticleRepository.addArticle(article);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void editArticle(Article article) {
+        try {
+            ArticleRepository.editArticle(article);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

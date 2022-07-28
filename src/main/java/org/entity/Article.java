@@ -69,7 +69,10 @@ public class Article {
     @Override
     public String toString() {
         return "\n" + id + "- Title: " + title + "\n" + "Brief: " +
-                brief + "\n" + "Created date: " + createDate + "\n";
-
+                brief + "\n" + "Created date: " + createDate + "\n" + "Content:\n" + content;
+    }
+    public String toStringSummary() {
+        return "\n" + id + "- Title: " + title + "\n" + "Brief: " +
+                brief + "\n" + "Created date: " + createDate;
     }
 }

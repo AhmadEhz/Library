@@ -10,10 +10,11 @@ public class UserService {
         return false;
     }
 
-    public static boolean checkSignIn(User user, boolean checkPassword) {
+    public static boolean isExistUsername(User user, boolean checkPassword) {
         try {
-            if (UserRepository.checkUser(user, checkPassword))
+            if (UserRepository.checkUser(user, checkPassword)) {
                 return true;
+            }
             else return false;
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -22,6 +23,13 @@ public class UserService {
     public static void createUser(User user) {
         try {
             UserRepository.saveUser(user);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void changePassword(User user) {
+        try {
+            UserRepository.changePassword(user);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

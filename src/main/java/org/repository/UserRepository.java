@@ -25,7 +25,7 @@ public class UserRepository {
 
     public static void changePassword(User user) throws SQLException {
         String query = """
-                update users 
+                update users
                 set password = ?
                 where id = ?;
                 """;
@@ -38,14 +38,15 @@ public class UserRepository {
     public static boolean checkUser(User user, boolean checkPassword) throws SQLException {
         String query = " select id from users " +
                 "where userName = ?";
-        query = checkPassword ? query + " and password = ?;" : query + ";";
+        query += checkPassword ? " and password = ?;" : ";";
         PreparedStatement ps = DbConfig.getConfig().prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, user.getUsername());
         if (checkPassword)
             ps.setString(2, user.getPassword());
         ResultSet rs = ps.executeQuery();
-        if (rs.next())
+        if (rs.next()) {
+            user.setId(rs.getInt(1));
             return true;
-        else return false;
+        } else return false;
     }
 }

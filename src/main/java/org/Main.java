@@ -7,7 +7,7 @@ import org.service.*;
 import java.sql.Date;
 
 public class Main {
-    static Boolean exit = false;
+    static Boolean exit = false;//for go back to previous menu.
     static Article article = new Article();
     static User user = new User();
 
@@ -22,37 +22,34 @@ public class Main {
             String input = Input.scanner();
             switch (input) {
                 case "1" -> signInMenu();
-                case "2" -> articleMenu();
+                case "2" -> articlesMenu();
                 case "0" -> exit = true;
                 default -> {
                     Print.invalidEntry();
                     Utility.delay(1);
-                    Print.enterNumber();
                 }
             }
         }
     }
 
-    private static void articleMenu() {
+    //prints all published articles and asks the user which article to show.
+    private static void articlesMenu() {
         Print.allArticles();
         while (!exit) {
             Print.articleMenu();
             String input = Input.scanner();
             if (input.equals("0"))
                 exit = true;
-            else
-                if (Utility.checkSelectedArticle(input))
-                    selectedArticle(Integer.parseInt(input));
+            else {
+                if (Utility.checkSelectedArticle(input, article, true, false))
+                    selectedArticle(article);
+            }
         }
+        article = new Article();
         exit = false;
     }
 
-    private static void selectedArticle(int id) {
-        article.setId(id);
-        Print.article(article);
-        Utility.delay(2);
-    }
-
+    //takes the username from user, or goes to signUpMenu.
     private static void signInMenu() {
         while (!exit) {
             Print.signInMenu();
@@ -62,12 +59,9 @@ public class Main {
                 case "0" -> exit = true;
                 default -> {
                     user.setUsername(input);
-                    if (UserService.checkSignIn(user, false)) {
+                    if (Utility.isUsernameExist()) {
                         enterPasswordMenu();
                         exit = true;
-                    } else {
-                        Print.invalidUsername();
-                        Utility.delay(1);
                     }
                 }
             }
@@ -76,20 +70,20 @@ public class Main {
         exit = false;
     }
 
+    //After username taken, takes the password and checks the password is correct or not.
     private static void enterPasswordMenu() {
         while (!exit) {
             Print.enterPassword();
             String input = Input.scanner();
-            switch (input) {
-                case "0" -> exit = true;
-                default -> {
-                    user.setPassword(input);
-                    if (UserService.checkSignIn(user, true))
-                        userMenu();
-                    else {
-                        Print.notCorrectPassword();
-                        Utility.delay(1);
-                    }
+            if ("0".equals(input)) {
+                exit = true;
+            } else {
+                user.setPassword(input);
+                if (Utility.checkPassword()) {
+                    Print.loggedIn();
+                    Utility.delay(2);
+                    userMenu();
+                    exit = true;
                 }
             }
         }
@@ -97,46 +91,21 @@ public class Main {
         exit = false;
     }
 
+    //After user login, this method is executed.
     private static void userMenu() {
+        article.setUser_id(user.getId());
         while (!exit) {
             Print.userMenu();
             String input = Input.scanner();
             switch (input) {
-                case "1":
-                    break;
-                case "2":
-                    break;
-                case "3":
-                    break;
-                case "0":
-                    exit = true;
-                    break;
-                default:
+                case "1" -> userArticlesMenu();
+                case "2" -> addArticleMenu();
+                case "3" -> changePasswordMenu();
+                case "0" -> exit = true;
+                default -> {
                     Print.invalidEntry();
                     Utility.delay(1);
                     Print.enterNumber();
-                    break;
-            }
-        }
-        user = new User();
-        exit = false;
-    }
-
-    private static void signUpMenu() {
-        while (!exit) {
-            Print.signUpMenu();
-            String input = Input.scanner();
-            switch (input) {
-                case "0" -> exit = true;
-                default -> {
-                    user.setUsername(input);
-                    if (!UserService.checkSignIn(user, false)) {
-                        createUserMenu();
-                        exit = true;
-                    } else {
-                        Print.usernameIsUsed();
-                        Utility.delay(1);
-                    }
                 }
             }
         }
@@ -144,13 +113,111 @@ public class Main {
         exit = false;
     }
 
+
+    //if user want to sign up, this method is executed and checks the username is not exist.
+    private static void signUpMenu() {
+        while (!exit) {
+            Print.signUpMenu();
+            String input = Input.scanner();
+            if ("0".equals(input)) {
+                exit = true;
+            } else {
+                user.setUsername(input);
+                if (Utility.checkUsername(input)) {
+                    createUserMenu();
+                    exit = true;
+                }
+            }
+        }
+        user = new User();
+        exit = false;
+    }
+
+    //after get username in signUpMenu, the user information is taken.
     private static void createUserMenu() {
         Print.enterNationalCode();
         user.setNationalCode(Input.scanner());
         Print.enterBirthday();
         user.setBirthday(Date.valueOf(Input.scanner()));
         UserService.createUser(user);
-        Print.createdUser();
+        Print.created();
+    }
+
+    //if user want to change password, this method is executed.
+    private static void changePasswordMenu() {
+        while (!exit) {
+            Print.enterNewPassword();
+            String input = Input.scanner();
+            if (input.equals("0"))
+                exit = true;
+            else if (Input.checkPassword(input)) {
+                user.setPassword(input);
+                UserService.changePassword(user);
+                exit = true;
+                Print.passwordChanged();
+            }
+        }
+        exit = false;
+    }
+
+    //Shows all article of user and ask the user which article want to edit.
+    public static void userArticlesMenu() {
+        Print.userArticles(user.getId());
+        while (!exit) {
+            Print.selectUserArticle();
+            String input = Input.scanner();
+            if (input.equals("0"))
+                exit = true;
+            else if (Utility.checkSelectedArticle(input, article, false, true)) {
+                article.setId(Integer.parseInt(input));
+                editArticleMenu(article);
+            }
+        }
+        exit = false;
+    }
+
+    //If user select an article, this method is executed
+    private static void editArticleMenu(Article article) {
+        while (!exit) {
+            ArticleService.loadSelectedArticle(article, false, true);
+            Print.userArticleMenu();
+            String input = Input.scanner();
+            switch (input) {
+                case "1" -> Print.article(article, true);
+                case "2" -> Utility.changeArticleStatus();
+                case "3" -> Utility.editArticle("title");
+                case "4" -> Utility.editArticle("brief");
+                case "5" -> Utility.editArticle("created date");
+                case "6" -> Utility.editArticle("content");
+                case "0" -> exit = true;
+                default -> {
+                    Print.invalidEntry();
+                    Utility.delay(1);
+                }
+            }
+        }
+        Utility.clearArticle();
+    }
+
+    //if user want to add an article, this method takes the article and add it.
+    private static void addArticleMenu() {
+        Print.enterArticleTitle();
+        article.setTitle(Input.scanner());
+        Print.enterArticleBrief();
+        article.setBrief(Input.scanner());
+        Print.enterArticleCreateDate();
+        article.setCreateDate(Date.valueOf(Input.scanner()));
+        Print.enterArticleContent();
+        article.setContent(Input.scanner());
+        ArticleService.saveArticle(article);
+        Print.added();
+        Utility.clearArticle();
+    }
+
+    //After checks article id that entered, that article is selected and printed with this method.
+    private static void selectedArticle(Article article) {
+        article = ArticleService.loadSelectedArticle(article, true, false);
+        Print.article(article, true);
         Utility.delay(2);
     }
 }
