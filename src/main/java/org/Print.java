@@ -104,6 +104,8 @@ public class Print {
     public static void created() {
         System.out.println("Created!");
         Utility.delay(2);
+        System.out.println("Your default password is your national code.");
+        Utility.delay(2);
     }
 
     static void loggedIn() {
